@@ -3,11 +3,12 @@ import { ref } from 'vue'
 import { Player } from '../entities/player';
 import { Board } from '../entities/board';
 import { useScoreStore } from '../stores/score';
+import { AI } from '../entities/ai';
 
 const score = useScoreStore();
 
 const showOverlay = ref(false);
-const winner = ref<'player' | 'computer' | 'draw' | null>(null);
+const winner = ref<Player | null>(null);
 
 const board = ref<Board>(new Board());
 const players = ref([
@@ -34,26 +35,35 @@ function handleClick(colIndex: number) {
       board.value.dropDisc(colIndex, rowIndex, currentPlayer.value);
 
       if (board.value.isLastEmptyCellInColumn(colIndex, rowIndex)) {
+        isAnimating.value = false;
+
         if (board.value.hasWon(colIndex, rowIndex, currentPlayer.value)) {
-          endGame(currentPlayer.value.index === 0 ? 'player' : 'computer');
-        } else if (board.value.isFull()) {
-          endGame('draw');
+          endGame(currentPlayer.value);
+          return;
+        } 
+        
+        if (board.value.isFull()) {
+          endGame(null);
+          return;
         }
 
         currentPlayer.value = players.value[currentPlayer.value.index === 0 ? 1 : 0];
-        isAnimating.value = false;
+
+        if (currentPlayer.value.index === 1) {
+          chooseForComputer();
+        }
       }
-    }, 10 * (rowIndex + 1));
+    }, 50 * (rowIndex + 1));
   }
 }
 
-function endGame(winnerType: 'player' | 'computer' | 'draw') {
-  winner.value = winnerType
+function endGame(player: Player | null) {
+  winner.value = player
   showOverlay.value = true
 
-  if (winnerType === 'player') {
+  if (player?.index === 0) {
     score.addWin();
-  } else if (winnerType === 'computer') {
+  } else if (player?.index === 1) {
     score.addLoss();
   } else {
     score.addDraw();
@@ -67,17 +77,24 @@ function nextGame() {
   showOverlay.value = false
   winner.value = null
 }
+
+function chooseForComputer() {
+  const ai = new AI(board.value, players.value);
+  const cell = ai.determineNextMove()
+  
+  handleClick(cell.colIndex);
+}
 </script>
 
 <template>
   <transition name="fade">
     <div v-if="showOverlay" class="overlay">
       <div class="overlay-content">
-        <template v-if="winner === 'player'">
+        <template v-if="winner?.index === 0">
           <div>🧑‍💻</div>
           <div>Player wins!</div>
         </template>
-        <template v-else-if="winner === 'computer'">
+        <template v-else-if="winner?.index === 1">
           <div>🤖</div>
           <div>Computer wins!</div>
         </template>
@@ -95,7 +112,7 @@ function nextGame() {
     <div v-for="(_, colIndex) in board.columns" :key="colIndex" class="column" @click="handleClick(colIndex)"
       @mouseenter="hoveredCol = colIndex" @mouseleave="hoveredCol = null">
 
-      <div v-if="hoveredCol === colIndex && !isAnimating && !board.isFullColumn(colIndex)" class="ghost-disk"
+      <div v-if="hoveredCol === colIndex && !isAnimating && !board.isFullColumn(colIndex) && currentPlayer.index === 0" class="ghost-disk"
         :style="{ backgroundColor: currentPlayer.color }" />
 
       <div v-for="(_, rowIndex) in board.rowsCount" :key="rowIndex" class="cell">
@@ -111,6 +128,10 @@ function nextGame() {
   justify-content: center;
   gap: 6px;
   margin: 20px auto;
+}
+
+.board.disabled {
+  pointer-events: none;
 }
 
 .column {

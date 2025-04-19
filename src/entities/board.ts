@@ -13,9 +13,23 @@ export class Board {
             this.columns[c] = [];
 
             for (let r = 0; r < this.rowsCount; r++) {
-                this.columns[c][r] = new Cell();
+                this.columns[c][r] = new Cell(c, r);
             }
         }
+    }
+
+    clone(): Board {
+        const board = new Board();
+
+        for (let c = 0; c < this.colsCount; c++) {
+            board.columns[c] = [];
+
+            for (let r = 0; r < this.rowsCount; r++) {
+                board.columns[c][r] = this.columns[c][r].clone();
+            }
+        }
+
+        return board;
     }
 
     isFull(): boolean {
@@ -40,6 +54,21 @@ export class Board {
 
     isLastEmptyCellInColumn(colIndex: number, rowIndex: number): boolean {
         return this.isLastCellInColumn(rowIndex) || this.isFullCell(colIndex, rowIndex + 1);
+    }
+
+    getCell(colIndex: number, rowIndex: number): Cell {
+        return this.columns[colIndex][rowIndex];
+    }
+
+    getLastEmptyCellInColumn(colIndex: number): Cell | null {
+        for (let rowIndex = this.rowsCount - 1; rowIndex >= 0; rowIndex--) {
+            const cell = this.getCell(colIndex, rowIndex);
+            if (cell.player === null) {
+                return cell;
+            }
+        }
+
+        return null;
     }
 
     getPlayerAt(colIndex: number, rowIndex: number): Player | null {
