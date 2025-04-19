@@ -4,7 +4,7 @@
   font-weight: 400;
 
   color: rgba(255, 255, 255, 0.87);
-  background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+  background: linear-gradient(to right, #b8860b, #c86e79);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -24,7 +24,7 @@ header {
   display: flex;
   flex-direction: column;
 
-  background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+  background: linear-gradient(to right, #b8860b, #c86e79);
   color: white;
   width: 100%;
   text-align: center;

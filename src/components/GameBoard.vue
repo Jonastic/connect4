@@ -11,8 +11,8 @@ const winner = ref<'player' | 'computer' | 'draw' | null>(null);
 
 const board = ref<Board>(new Board());
 const players = ref([
-  new Player(0, 'Player', '#3b82f6'),
-  new Player(1, 'Computer', '#ef4444')
+  new Player(0, 'Player', '#2a9d8f'),
+  new Player(1, 'Computer', '#e76f51')
 ]);
 const currentPlayer = ref<Player>(players.value[0]);
 
@@ -148,7 +148,7 @@ function nextGame() {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  opacity: 0.4;
+  opacity: 0.6;
   transition: opacity 0.2s;
   pointer-events: none;
   z-index: 5;
